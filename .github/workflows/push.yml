@@ -76,10 +76,10 @@ jobs:
           BUILDX_PLATFORM: ${{ matrix.platform }}
           BUILDX_BUILDER_NAME: ${{ steps.buildx-setup.outputs.name }}
       - id: arm-time-limit
-        name: Set Netbox container start_period higher on ARM64
+        name: Set Netpoint container start_period higher on ARM64
         if: matrix.platform == 'linux/arm64'
         run: |
-          echo "NETBOX_START_PERIOD=240s" >>"${GITHUB_ENV}"
+          echo "NETPOINT_START_PERIOD=240s" >>"${GITHUB_ENV}"
       - id: docker-test
         name: Test the image
         run: IMAGE="${FINAL_DOCKER_TAG}" ./test.sh

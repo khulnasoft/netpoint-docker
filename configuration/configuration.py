@@ -292,7 +292,7 @@ RQ_DEFAULT_TIMEOUT = _environ_get_and_map('RQ_DEFAULT_TIMEOUT', 300, _AS_INT)
 # The name to use for the csrf token cookie.
 CSRF_COOKIE_NAME = environ.get('CSRF_COOKIE_NAME', 'csrftoken')
 
-# Cross-Site-Request-Forgery-Attack settings. If Netbox is sitting behind a reverse proxy, you might need to set the CSRF_TRUSTED_ORIGINS flag.
+# Cross-Site-Request-Forgery-Attack settings. If Netpoint is sitting behind a reverse proxy, you might need to set the CSRF_TRUSTED_ORIGINS flag.
 # Django 4.0 requires to specify the URL Scheme in this setting. An example environment variable could be specified like:
 # CSRF_TRUSTED_ORIGINS=https://demo.netpoint.dev http://demo.netpoint.dev
 CSRF_TRUSTED_ORIGINS = _environ_get_and_map('CSRF_TRUSTED_ORIGINS', '', _AS_LIST)

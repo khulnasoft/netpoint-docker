@@ -2,7 +2,7 @@
 # Of course uncomment this file out.
 
 # To learn how to build images with your required plugins
-# See https://github.com/khulnasoft/netpoint-docker/wiki/Using-Netbox-Plugins
+# See https://github.com/khulnasoft/netpoint-docker/wiki/Using-Netpoint-Plugins
 
 # PLUGINS = ["netpoint_bgp"]
 

@@ -29,12 +29,12 @@ URL         Where to fetch the code from.
             Must be a git repository. Can be private.
             ${_GREEN}Default:${_CLEAR} https://github.com/\${SRC_ORG}/\${SRC_REPO}.git
 
-NETBOX_PATH The path where netpoint will be checkout out.
+NETPOINT_PATH The path where netpoint will be checkout out.
             Must not be outside of the netpoint-docker repository (because of Docker)!
             ${_GREEN}Default:${_CLEAR} .netpoint
 
-SKIP_GIT    If defined, git is not invoked and \${NETBOX_PATH} will not be altered.
-            This may be useful, if you are manually managing the NETBOX_PATH.
+SKIP_GIT    If defined, git is not invoked and \${NETPOINT_PATH} will not be altered.
+            This may be useful, if you are manually managing the NETPOINT_PATH.
             ${_GREEN}Default:${_CLEAR} undefined
 
 TAG         The version part of the image tag.
@@ -163,34 +163,34 @@ gh_echo "::group::⤵️ Fetching the NetPoint source code"
 ###
 SRC_ORG="${SRC_ORG-khulnasoft}"
 SRC_REPO="${SRC_REPO-netpoint}"
-NETBOX_BRANCH="${1}"
+NETPOINT_BRANCH="${1}"
 URL="${URL-https://github.com/${SRC_ORG}/${SRC_REPO}.git}"
-NETBOX_PATH="${NETBOX_PATH-.netpoint}"
+NETPOINT_PATH="${NETPOINT_PATH-.netpoint}"
 
 ###
 # Fetching the NetPoint source
 ###
 if [ "${2}" != "--push-only" ] && [ -z "${SKIP_GIT}" ]; then
-  REMOTE_EXISTS=$(git ls-remote --heads --tags "${URL}" "${NETBOX_BRANCH}" | wc -l)
+  REMOTE_EXISTS=$(git ls-remote --heads --tags "${URL}" "${NETPOINT_BRANCH}" | wc -l)
   if [ "${REMOTE_EXISTS}" == "0" ]; then
-    echo "❌ Remote branch '${NETBOX_BRANCH}' not found in '${URL}'; Nothing to do"
+    echo "❌ Remote branch '${NETPOINT_BRANCH}' not found in '${URL}'; Nothing to do"
     gh_out "skipped=true"
     exit 0
   fi
-  echo "🌐 Checking out '${NETBOX_BRANCH}' of NetPoint from the url '${URL}' into '${NETBOX_PATH}'"
-  if [ ! -d "${NETBOX_PATH}" ]; then
-    $DRY git clone -q --depth 10 -b "${NETBOX_BRANCH}" "${URL}" "${NETBOX_PATH}"
+  echo "🌐 Checking out '${NETPOINT_BRANCH}' of NetPoint from the url '${URL}' into '${NETPOINT_PATH}'"
+  if [ ! -d "${NETPOINT_PATH}" ]; then
+    $DRY git clone -q --depth 10 -b "${NETPOINT_BRANCH}" "${URL}" "${NETPOINT_PATH}"
   fi
 
   (
-    $DRY cd "${NETBOX_PATH}"
+    $DRY cd "${NETPOINT_PATH}"
     # shellcheck disable=SC2030
     if [ -n "${HTTP_PROXY}" ]; then
       git config http.proxy "${HTTP_PROXY}"
     fi
 
     $DRY git remote set-url origin "${URL}"
-    $DRY git fetch -qp --depth 10 origin "${NETBOX_BRANCH}"
+    $DRY git fetch -qp --depth 10 origin "${NETPOINT_BRANCH}"
     $DRY git checkout -qf FETCH_HEAD
     $DRY git prune
   )
@@ -235,17 +235,17 @@ fi
 PROJECT_VERSION="${PROJECT_VERSION-$(sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' VERSION)}"
 
 # Get the Git information from the netpoint directory
-if [ -d "${NETBOX_PATH}/.git" ] && [ -z "${SKIP_GIT}" ]; then
-  NETBOX_GIT_REF=$(
-    cd "${NETBOX_PATH}"
+if [ -d "${NETPOINT_PATH}/.git" ] && [ -z "${SKIP_GIT}" ]; then
+  NETPOINT_GIT_REF=$(
+    cd "${NETPOINT_PATH}"
     git rev-parse HEAD
   )
-  NETBOX_GIT_BRANCH=$(
-    cd "${NETBOX_PATH}"
+  NETPOINT_GIT_BRANCH=$(
+    cd "${NETPOINT_PATH}"
     git rev-parse --abbrev-ref HEAD
   )
-  NETBOX_GIT_URL=$(
-    cd "${NETBOX_PATH}"
+  NETPOINT_GIT_URL=$(
+    cd "${NETPOINT_PATH}"
     git remote get-url origin
   )
 fi
@@ -256,7 +256,7 @@ fi
 DOCKER_REGISTRY="${DOCKER_REGISTRY-docker.io}"
 DOCKER_ORG="${DOCKER_ORG-khulnasoft}"
 DOCKER_REPO="${DOCKER_REPO-netpoint}"
-case "${NETBOX_BRANCH}" in
+case "${NETPOINT_BRANCH}" in
 master)
   TAG="${TAG-latest}"
   ;;
@@ -264,7 +264,7 @@ develop)
   TAG="${TAG-snapshot}"
   ;;
 *)
-  TAG="${TAG-$NETBOX_BRANCH}"
+  TAG="${TAG-$NETPOINT_BRANCH}"
   ;;
 esac
 
@@ -329,14 +329,14 @@ else
   echo "Checking labels for '${FINAL_DOCKER_TAG}'"
   BASE_LAST_LAYER=$(get_image_last_layer "${DOCKER_FROM}")
   OLD_BASE_LAST_LAYER=$(get_image_label netpoint.last-base-image-layer "${FINAL_DOCKER_TAG}")
-  NETBOX_GIT_REF_OLD=$(get_image_label netpoint.git-ref "${FINAL_DOCKER_TAG}")
+  NETPOINT_GIT_REF_OLD=$(get_image_label netpoint.git-ref "${FINAL_DOCKER_TAG}")
   GIT_REF_OLD=$(get_image_label org.opencontainers.image.revision "${FINAL_DOCKER_TAG}")
 
   if [ "${BASE_LAST_LAYER}" != "${OLD_BASE_LAST_LAYER}" ]; then
     SHOULD_BUILD="true"
     BUILD_REASON="${BUILD_REASON} ubuntu"
   fi
-  if [ "${NETBOX_GIT_REF}" != "${NETBOX_GIT_REF_OLD}" ]; then
+  if [ "${NETPOINT_GIT_REF}" != "${NETPOINT_GIT_REF_OLD}" ]; then
     SHOULD_BUILD="true"
     BUILD_REASON="${BUILD_REASON} netpoint"
   fi
@@ -382,11 +382,11 @@ if [ -d ".git" ] && [ -z "${SKIP_GIT}" ]; then
     --label "org.opencontainers.image.revision=${GIT_REF}"
   )
 fi
-if [ -d "${NETBOX_PATH}/.git" ] && [ -z "${SKIP_GIT}" ]; then
+if [ -d "${NETPOINT_PATH}/.git" ] && [ -z "${SKIP_GIT}" ]; then
   DOCKER_BUILD_ARGS+=(
-    --label "netpoint.git-branch=${NETBOX_GIT_BRANCH}"
-    --label "netpoint.git-ref=${NETBOX_GIT_REF}"
-    --label "netpoint.git-url=${NETBOX_GIT_URL}"
+    --label "netpoint.git-branch=${NETPOINT_GIT_BRANCH}"
+    --label "netpoint.git-ref=${NETPOINT_GIT_REF}"
+    --label "netpoint.git-url=${NETPOINT_GIT_URL}"
   )
 fi
 if [ -n "${BUILD_REASON}" ]; then
@@ -396,7 +396,7 @@ if [ -n "${BUILD_REASON}" ]; then
 fi
 
 # --build-arg
-DOCKER_BUILD_ARGS+=(--build-arg "NETBOX_PATH=${NETBOX_PATH}")
+DOCKER_BUILD_ARGS+=(--build-arg "NETPOINT_PATH=${NETPOINT_PATH}")
 
 if [ -n "${DOCKER_FROM}" ]; then
   DOCKER_BUILD_ARGS+=(--build-arg "FROM=${DOCKER_FROM}")

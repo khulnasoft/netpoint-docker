@@ -50,21 +50,21 @@ test_setup() {
 }
 
 test_netpoint_unit_tests() {
-  gh_echo "::group:: Netbox unit tests"
+  gh_echo "::group:: Netpoint unit tests"
   echo "⏱ Running NetPoint Unit Tests"
   $doco run --rm netpoint /opt/netpoint/venv/bin/python /opt/netpoint/netpoint/manage.py test
   gh_echo "::endgroup::"
 }
 
 test_compose_db_setup() {
-  gh_echo "::group:: Netbox DB migrations"
+  gh_echo "::group:: Netpoint DB migrations"
   echo "⏱ Running NetPoint DB migrations"
   $doco run --rm netpoint /opt/netpoint/venv/bin/python /opt/netpoint/netpoint/manage.py migrate
   gh_echo "::endgroup::"
 }
 
 test_netpoint_start() {
-  gh_echo "::group:: Start Netbox service"
+  gh_echo "::group:: Start Netpoint service"
   echo "⏱ Starting NetPoint services"
   $doco up --detach --wait
   gh_echo "::endgroup::"
