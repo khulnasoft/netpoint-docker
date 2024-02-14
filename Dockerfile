@@ -28,8 +28,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
       setuptools \
       wheel
 
-ARG NETBOX_PATH
-COPY ${NETBOX_PATH}/requirements.txt requirements-container.txt /
+ARG NETPOINT_PATH
+COPY ${NETPOINT_PATH}/requirements.txt requirements-container.txt /
 RUN \
     # We compile 'psycopg' in the build process
     sed -i -e '/psycopg/d' /requirements.txt && \
@@ -80,8 +80,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 
 COPY --from=builder /opt/netpoint/venv /opt/netpoint/venv
 
-ARG NETBOX_PATH
-COPY ${NETBOX_PATH} /opt/netpoint
+ARG NETPOINT_PATH
+COPY ${NETPOINT_PATH} /opt/netpoint
 # Copy the modified 'requirements*.txt' files, to have the files actually used during installation
 COPY --from=builder /requirements.txt /requirements-container.txt /opt/netpoint/
 
