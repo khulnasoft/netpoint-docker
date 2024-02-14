@@ -121,13 +121,13 @@ ${0} develop-2.7
             This will fetch the 'develop-2.7' branch, build a Docker Image and tag it
             'khulnasoft/netpoint:develop-2.7'.
 
-SRC_ORG=cimnine ${0} feature-x
-            This will fetch the 'feature-x' branch from https://github.com/cimnine/netpoint.git,
+SRC_ORG=khulnasoft ${0} feature-x
+            This will fetch the 'feature-x' branch from https://github.com/khulnasoft/netpoint.git,
             build a Docker Image and tag it 'khulnasoft/netpoint:feature-x'.
 
-SRC_ORG=cimnine DOCKER_ORG=cimnine ${0} feature-x
-            This will fetch the 'feature-x' branch from https://github.com/cimnine/netpoint.git,
-            build a Docker Image and tag it 'cimnine/netpoint:feature-x'.
+SRC_ORG=khulnasoft DOCKER_ORG=khulnasoft ${0} feature-x
+            This will fetch the 'feature-x' branch from https://github.com/khulnasoft/netpoint.git,
+            build a Docker Image and tag it 'khulnasoft/netpoint:feature-x'.
 END_OF_HELP
 
   if [ "${1}x" == "x" ]; then
