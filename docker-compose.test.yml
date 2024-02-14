@@ -1,0 +1,66 @@
+version: '3.4'
+services:
+  netpoint: &netpoint
+    image: ${IMAGE-khulnasoft/netpoint:latest}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+    env_file: env/netpoint.env
+    user: 'unit:root'
+    volumes:
+    - ./test-configuration/test_config.py:/etc/netpoint/config/test_config.py:z,ro
+    healthcheck:
+      start_period: ${NETBOX_START_PERIOD-120s}
+      timeout: 3s
+      interval: 15s
+      test: "curl -f http://localhost:8080/api/ || exit 1"
+  netpoint-worker:
+    <<: *netpoint
+    command:
+    - /opt/netpoint/venv/bin/python
+    - /opt/netpoint/netpoint/manage.py
+    - rqworker
+    healthcheck:
+      start_period: 40s
+      timeout: 3s
+      interval: 15s
+      test: "ps -aux | grep -v grep | grep -q rqworker || exit 1"
+  netpoint-housekeeping:
+    <<: *netpoint
+    command:
+    - /opt/netpoint/housekeeping.sh
+    healthcheck:
+      start_period: 40s
+      timeout: 3s
+      interval: 15s
+      test: "ps -aux | grep -v grep | grep -q housekeeping || exit 1"
+  postgres:
+    image: postgres:16-alpine
+    env_file: env/postgres.env
+    healthcheck:
+      test: "pg_isready -t 2 -d $$POSTGRES_DB -U $$POSTGRES_USER" ## $$ because of docker-compose
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis: &redis
+    image: redis:7-alpine
+    command:
+    - sh
+    - -c # this is to evaluate the $REDIS_PASSWORD from the env
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    env_file: env/redis.env
+    healthcheck:
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      test: "timeout 2 redis-cli ping"
+  redis-cache:
+    <<: *redis
+    env_file: env/redis-cache.env
+volumes:
+  netpoint-media-files:
+    driver: local

@@ -1,0 +1,10 @@
+.git*
+*.md
+build*
+docker-compose*
+env
+test-configuration
+.netpoint/.git*
+.netpoint/contrib
+.netpoint/scripts
+.netpoint/upgrade.sh
