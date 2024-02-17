@@ -26,7 +26,7 @@ jobs:
     env:
       GH_ACTION: enable
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      IMAGE_NAMES: docker.io/khulnasoft/netpoint quay.io/khulnasoft/netpoint ghcr.io/khulnasoft/netpoint
+      IMAGE_NAMES: docker.io/khulnasoft/netpoint ghcr.io/khulnasoft/netpoint
     steps:
       - id: source-checkout
         name: Checkout
